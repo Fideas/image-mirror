@@ -1,10 +1,15 @@
 package com.nicolascarrasco.www.imagemirror;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.PorterDuff;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +17,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 
+import com.nicolascarrasco.www.imagemirror.services.Constants.Constants;
 import com.nicolascarrasco.www.imagemirror.services.GetImageIntentService;
 
 import butterknife.BindView;
@@ -24,7 +30,9 @@ import butterknife.OnTextChanged;
  */
 public class MainFragment extends Fragment {
 
-    Context mContext;
+    private Context mContext;
+    private IntentFilter mIntentFilter;
+    private ResponseReceiver mReceiver;
 
     @BindView(R.id.progress_bar)
     ProgressBar mProgressBar;
@@ -40,6 +48,19 @@ public class MainFragment extends Fragment {
 
     // Lifecycle functions
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mContext = context;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mIntentFilter = new IntentFilter(Constants.BROADCAST_ACTION);
+        mReceiver = new ResponseReceiver();
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
@@ -52,9 +73,15 @@ public class MainFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        mContext = context;
+    public void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(mReceiver, mIntentFilter);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mReceiver);
     }
 
     // UI gesture listeners
@@ -80,5 +107,16 @@ public class MainFragment extends Fragment {
         //Start the service that fetches the image
         String url = mUrlView.getText().toString();
         GetImageIntentService.getImage(mContext, url);
+    }
+
+    // Broadcast receiver for receiving status updates from the IntentService
+    private class ResponseReceiver extends BroadcastReceiver {
+
+        private ResponseReceiver() {}
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // TODO: Define behavior for success and failure
+        }
     }
 }
