@@ -5,12 +5,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.PorterDuff;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +25,11 @@ import android.widget.Toast;
 import com.nicolascarrasco.www.imagemirror.services.Constants.Constants;
 import com.nicolascarrasco.www.imagemirror.services.GetImageIntentService;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -32,6 +39,8 @@ import butterknife.OnTextChanged;
  * A placeholder fragment containing a simple view.
  */
 public class MainFragment extends Fragment {
+
+    private static final String TAG = MainFragment.class.getSimpleName();
 
     private Context mContext;
     private IntentFilter mIntentFilter;
@@ -115,10 +124,26 @@ public class MainFragment extends Fragment {
         GetImageIntentService.getImage(mContext, url);
     }
 
+    private Bitmap loadFromInternalStorage() {
+        FileInputStream inputStream;
+        Bitmap bitmap = null;
+        try {
+            inputStream = mContext.openFileInput(Constants.STORED_IMAGE_FILENAME);
+            bitmap = BitmapFactory.decodeStream(inputStream);
+            inputStream.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.e(TAG, e.getMessage(), e);
+        }
+        return bitmap;
+    }
+
     // Broadcast receiver for receiving status updates from the IntentService
     private class ResponseReceiver extends BroadcastReceiver {
 
-        private ResponseReceiver() {}
+        private ResponseReceiver() {
+        }
 
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -128,9 +153,9 @@ public class MainFragment extends Fragment {
             mUrlView.setEnabled(true);
 
             String status = intent.getStringExtra(Constants.EXTENDED_DATA_STATUS);
-            switch (status){
+            switch (status) {
                 case Constants.SUCCESS:
-                    Bitmap image = intent.getParcelableExtra(Constants.EXTENDED_DATA_BITMAP);
+                    Bitmap image = loadFromInternalStorage();
                     mImageView.setImageBitmap(image);
                     break;
                 case Constants.FAILURE:

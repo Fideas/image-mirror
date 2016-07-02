@@ -1,6 +1,7 @@
 package com.nicolascarrasco.www.imagemirror.services;
 
 import android.app.IntentService;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -11,6 +12,9 @@ import android.util.Log;
 import com.nicolascarrasco.www.imagemirror.R;
 import com.nicolascarrasco.www.imagemirror.services.Constants.Constants;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -69,8 +73,7 @@ public class GetImageIntentService extends IntentService {
 
         if (options.outMimeType == null || !options.outMimeType.startsWith("image/")) {
             // Not an image
-            sendLocalBroadcast(Constants.FAILURE,
-                    getString(R.string.status_message_no_image), null);
+            sendLocalBroadcast(Constants.FAILURE, getString(R.string.status_message_no_image));
             return;
         }
 
@@ -85,7 +88,8 @@ public class GetImageIntentService extends IntentService {
         options.inJustDecodeBounds = false;
         Bitmap downloadedImage = BitmapFactory.decodeStream(mInputStream, null, options);
 
-        sendLocalBroadcast(Constants.SUCCESS, "", downloadedImage);
+        saveToInternalStorage(downloadedImage);
+        sendLocalBroadcast(Constants.SUCCESS, null);
 
         closeConnection();
     }
@@ -111,19 +115,28 @@ public class GetImageIntentService extends IntentService {
         return inSampleSize;
     }
 
-    private void sendLocalBroadcast(String status, String message, Bitmap image) {
+    private void sendLocalBroadcast(String status, String message) {
         Intent localIntent = new Intent(Constants.BROADCAST_ACTION)
                 .putExtra(Constants.EXTENDED_DATA_STATUS, status)
                 .putExtra(Constants.EXTENDED_DATA_MESSAGE, message);
 
-        if (image != null) {
-            localIntent.putExtra(Constants.EXTENDED_DATA_BITMAP, image);
-        }
-
         LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
     }
 
-    private void startConnection(String urlString){
+    private void saveToInternalStorage(Bitmap bitmapImage) {
+        FileOutputStream outputStream;
+        try {
+            outputStream = this.openFileOutput(Constants.STORED_IMAGE_FILENAME,
+                    Context.MODE_PRIVATE);
+            bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            outputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.e(TAG, e.getMessage(), e);
+        }
+    }
+
+    private void startConnection(String urlString) {
         try {
             URL url = new URL(urlString);
             mConnection = (HttpURLConnection) url.openConnection();
