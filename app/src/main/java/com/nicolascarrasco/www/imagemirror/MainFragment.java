@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.nicolascarrasco.www.imagemirror.services.Constants.Constants;
 import com.nicolascarrasco.www.imagemirror.services.GetImageIntentService;
@@ -117,6 +118,18 @@ public class MainFragment extends Fragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             // TODO: Define behavior for success and failure
+            String status = intent.getStringExtra(Constants.EXTENDED_DATA_STATUS);
+            switch (status){
+                case Constants.FAILURE:
+                    // Restore the UI
+                    mProgressBar.setVisibility(View.GONE);
+                    mActionButton.setEnabled(true);
+                    mUrlView.setEnabled(true);
+
+                    // Tell the user something is wrong
+                    Toast.makeText(mContext, intent.getStringExtra(Constants.EXTENDED_DATA_MESSAGE),
+                            Toast.LENGTH_SHORT).show();
+            }
         }
     }
 }
