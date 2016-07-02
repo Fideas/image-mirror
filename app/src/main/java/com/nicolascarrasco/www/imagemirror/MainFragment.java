@@ -12,6 +12,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 
+import com.nicolascarrasco.www.imagemirror.services.GetImageIntentService;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -58,9 +60,9 @@ public class MainFragment extends Fragment {
     // UI gesture listeners
     @SuppressWarnings("unused")
     @OnTextChanged(R.id.edit_text_image_url)
-    public void validateUrl(CharSequence url){
+    public void validateUrl(CharSequence url) {
         // Super simple validation for now
-        if (url.length() > 0){
+        if (url.length() > 0) {
             mActionButton.setEnabled(true);
         } else {
             mActionButton.setEnabled(false);
@@ -69,12 +71,14 @@ public class MainFragment extends Fragment {
 
     @SuppressWarnings("unused")
     @OnClick(R.id.button_get_image)
-    public void launchGetImageService(){
+    public void launchGetImageService() {
         // Change the UI to reflect the task is running
         mProgressBar.setVisibility(View.VISIBLE);
         mActionButton.setEnabled(false);
         mUrlView.setEnabled(false);
 
-        // TODO: Start the service that fetches the image
+        //Start the service that fetches the image
+        String url = mUrlView.getText().toString();
+        GetImageIntentService.getImage(mContext, url);
     }
 }
