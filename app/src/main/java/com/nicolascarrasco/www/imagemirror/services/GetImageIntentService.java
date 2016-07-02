@@ -14,9 +14,7 @@ import com.nicolascarrasco.www.imagemirror.services.Constants.Constants;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -29,9 +27,13 @@ public class GetImageIntentService extends IntentService {
     private static final String TAG = GetImageIntentService.class.getSimpleName();
 
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
-    private static final String ACTION_GET_IMAGE = "com.nicolascarrasco.www.imagemirror.action.GET_IMAGE";
+    private static final String ACTION_GET_IMAGE =
+            "com.nicolascarrasco.www.imagemirror.action.GET_IMAGE";
 
     private static final String EXTRA_URL = "com.nicolascarrasco.www.imagemirror.extra.URL";
+
+    private InputStream mInputStream;
+    private HttpURLConnection mConnection;
 
     public GetImageIntentService() {
         super("GetImageIntentService");
@@ -56,44 +58,97 @@ public class GetImageIntentService extends IntentService {
     }
 
     private void handleActionGetImage(String urlString) {
-        URL url;
-        HttpURLConnection connection = null;
-        InputStream input = null;
 
-        try {
-            url = new URL(urlString);
-            connection = (HttpURLConnection) url.openConnection();
-            connection.connect();
-
-            input = connection.getInputStream();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            Log.e(TAG, e.getMessage(), e);
-        }
+        startConnection(urlString);
 
         // Pretty much everything here is a clone from:
         // https://developer.android.com/training/displaying-bitmaps/load-bitmap.html
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
-        BitmapFactory.decodeStream(input, null, options);
+        BitmapFactory.decodeStream(mInputStream, null, options);
 
-        if(options.outMimeType == null || !options.outMimeType.startsWith("image/")){
+        if (options.outMimeType == null || !options.outMimeType.startsWith("image/")) {
             // Not an image
-            sendLocalBroadcast(Constants.FAILURE, getString(R.string.status_message_no_image));
+            sendLocalBroadcast(Constants.FAILURE,
+                    getString(R.string.status_message_no_image), null);
             return;
         }
 
-        if (connection != null){
-            connection.disconnect();
-        }
+        options.inSampleSize = calculateInSampleSize(options,
+                getResources().getDimensionPixelSize(R.dimen.image_width),
+                getResources().getDimensionPixelSize(R.dimen.image_height));
+
+        closeConnection();
+
+        startConnection(urlString);
+
+        options.inJustDecodeBounds = false;
+        Bitmap downloadedImage = BitmapFactory.decodeStream(mInputStream, null, options);
+
+        sendLocalBroadcast(Constants.SUCCESS, "", downloadedImage);
+
+        closeConnection();
     }
 
-    private void sendLocalBroadcast(String status, String message){
+    private int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) > reqHeight
+                    && (halfWidth / inSampleSize) > reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+        return inSampleSize;
+    }
+
+    private void sendLocalBroadcast(String status, String message, Bitmap image) {
         Intent localIntent = new Intent(Constants.BROADCAST_ACTION)
                 .putExtra(Constants.EXTENDED_DATA_STATUS, status)
                 .putExtra(Constants.EXTENDED_DATA_MESSAGE, message);
 
+        if (image != null) {
+            localIntent.putExtra(Constants.EXTENDED_DATA_BITMAP, image);
+        }
+
         LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
+    }
+
+    private void startConnection(String urlString){
+        try {
+            URL url = new URL(urlString);
+            mConnection = (HttpURLConnection) url.openConnection();
+            mConnection.connect();
+
+            mInputStream = mConnection.getInputStream();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.e(TAG, e.getMessage(), e);
+        }
+    }
+
+    private void closeConnection() {
+        try {
+            if (mInputStream != null) {
+                mInputStream.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.e(TAG, e.getMessage(), e);
+        }
+
+        if (mConnection != null) {
+            mConnection.disconnect();
+        }
     }
 }

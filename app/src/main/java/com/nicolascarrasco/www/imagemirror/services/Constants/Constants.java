@@ -15,6 +15,9 @@ public class Constants {
     // Defines the key for the message "extra" in an Intent
     public static final String EXTENDED_DATA_MESSAGE =
             "com.nicolascarrasco.www.imagemirror.MESSAGE";
+    // Defines the key for the message "extra" in an Intent
+    public static final String EXTENDED_DATA_BITMAP =
+            "com.nicolascarrasco.www.imagemirror.BITMAP";
 
     public static final String SUCCESS = "success";
     public static final String FAILURE = "failure";

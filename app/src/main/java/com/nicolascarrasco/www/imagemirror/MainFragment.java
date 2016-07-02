@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -15,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -43,6 +45,9 @@ public class MainFragment extends Fragment {
 
     @BindView(R.id.edit_text_image_url)
     EditText mUrlView;
+
+    @BindView(R.id.image_view_container)
+    ImageView mImageView;
 
     public MainFragment() {
     }
@@ -117,18 +122,24 @@ public class MainFragment extends Fragment {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            // TODO: Define behavior for success and failure
+            // Restore the UI
+            mProgressBar.setVisibility(View.GONE);
+            mActionButton.setEnabled(true);
+            mUrlView.setEnabled(true);
+
             String status = intent.getStringExtra(Constants.EXTENDED_DATA_STATUS);
             switch (status){
+                case Constants.SUCCESS:
+                    Bitmap image = intent.getParcelableExtra(Constants.EXTENDED_DATA_BITMAP);
+                    mImageView.setImageBitmap(image);
+                    break;
                 case Constants.FAILURE:
-                    // Restore the UI
-                    mProgressBar.setVisibility(View.GONE);
-                    mActionButton.setEnabled(true);
-                    mUrlView.setEnabled(true);
-
                     // Tell the user something is wrong
                     Toast.makeText(mContext, intent.getStringExtra(Constants.EXTENDED_DATA_MESSAGE),
                             Toast.LENGTH_SHORT).show();
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Unknown status");
             }
         }
     }
