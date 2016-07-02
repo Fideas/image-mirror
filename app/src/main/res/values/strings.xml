@@ -7,4 +7,5 @@
     <!-- Strings for the Main Activity -->
     <string name="image_url_hint">Image URL</string>
     <string name="get_image_prompt">Get image</string>
+    <string name="status_message_no_image">The specified URL is not an image</string>
 </resources>
