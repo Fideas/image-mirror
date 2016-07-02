@@ -3,4 +3,8 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+    <!-- 12% black as per Material Design guidelines -->
+    <color name="colorButtonDisabledLight">#1F000000</color>
+    <!-- 12% black over primary color -->
+    <color name="colorButtonFocused">#37479F</color>
 </resources>

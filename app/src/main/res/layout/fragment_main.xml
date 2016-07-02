@@ -22,12 +22,7 @@
             android:inputType="textUri" />
     </android.support.design.widget.TextInputLayout>
 
-    <Button
-        android:id="@+id/button_get_image"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/get_image_prompt"
-        android:theme="@style/MyButtonStyle" />
+    <include layout="@layout/button_compatible" />
 
     <FrameLayout
         android:layout_width="match_parent"
