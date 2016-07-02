@@ -1,10 +1,4 @@
 <resources>
-    <!-- Title and menu item names -->
     <string name="app_name">ImageMirror</string>
-    <string name="main_activity_name">Image mirror</string>
     <string name="action_settings">Settings</string>
-
-    <!-- Strings for the Main Activity -->
-    <string name="image_url_hint">Image URL</string>
-    <string name="get_image_prompt">Get image</string>
 </resources>
