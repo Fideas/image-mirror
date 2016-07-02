@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.PorterDuff;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -139,6 +140,14 @@ public class MainFragment extends Fragment {
         return bitmap;
     }
 
+    private Bitmap mirrorImage(Bitmap bitmap) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(180);
+
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
+                bitmap.getHeight(), matrix, true);
+    }
+
     // Broadcast receiver for receiving status updates from the IntentService
     private class ResponseReceiver extends BroadcastReceiver {
 
@@ -156,7 +165,8 @@ public class MainFragment extends Fragment {
             switch (status) {
                 case Constants.SUCCESS:
                     Bitmap image = loadFromInternalStorage();
-                    mImageView.setImageBitmap(image);
+                    Bitmap mirroredImage = mirrorImage(image);
+                    mImageView.setImageBitmap(mirroredImage);
                     break;
                 case Constants.FAILURE:
                     // Tell the user something is wrong
