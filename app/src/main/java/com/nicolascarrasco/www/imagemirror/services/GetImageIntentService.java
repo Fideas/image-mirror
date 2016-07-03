@@ -1,7 +1,6 @@
 package com.nicolascarrasco.www.imagemirror.services;
 
 import android.app.IntentService;
-import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -10,10 +9,8 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.nicolascarrasco.www.imagemirror.R;
-import com.nicolascarrasco.www.imagemirror.services.Constants.Constants;
+import com.nicolascarrasco.www.imagemirror.constants.Constants;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;

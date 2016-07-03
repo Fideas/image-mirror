@@ -23,12 +23,10 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.nicolascarrasco.www.imagemirror.services.Constants.Constants;
+import com.nicolascarrasco.www.imagemirror.constants.Constants;
 import com.nicolascarrasco.www.imagemirror.services.GetImageIntentService;
 
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import butterknife.BindView;
