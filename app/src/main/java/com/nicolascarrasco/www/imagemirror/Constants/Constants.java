@@ -1,4 +1,4 @@
-package com.nicolascarrasco.www.imagemirror.services.Constants;
+package com.nicolascarrasco.www.imagemirror.constants;
 
 /**
  * Created by Nicolas Carrasco S on 7/2/2016.
